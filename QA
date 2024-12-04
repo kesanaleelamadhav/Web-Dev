@@ -1,0 +1,44 @@
+**Set Up Release Pipeline for Kubernetes Deployment**:
+   - Define a multi-stage YAML pipeline with `staging` and `production` environments.
+   - Use Kubernetes deployment manifests or Helm charts for AKS deployment.
+
+   **Sample CD Pipeline for Deploying to AKS**:
+   ```yaml
+   stages:
+     - stage: Deploy_Staging
+       jobs:
+         - job: DeployToStaging
+           pool:
+             vmImage: 'ubuntu-latest'
+           steps:
+             - task: Kubernetes@1
+               inputs:
+                 connectionType: 'Azure Resource Manager'
+                 azureSubscription: 'AzureSub'
+                 azureResourceGroup: 'ResourceGroup'
+                 kubernetesCluster: 'AKSCluster'
+                 namespace: 'staging'
+                 command: 'apply'
+                 arguments: '-f k8s-deployment.yml'
+           deployment:
+             environment: 'staging'
+
+     - stage: Deploy_Production
+       dependsOn: Deploy_Staging
+       jobs:
+         - job: DeployToProduction
+           pool:
+             vmImage: 'ubuntu-latest'
+           steps:
+             - task: Kubernetes@1
+               inputs:
+                 connectionType: 'Azure Resource Manager'
+                 azureSubscription: 'AzureSub'
+                 azureResourceGroup: 'ResourceGroup'
+                 kubernetesCluster: 'AKSCluster'
+                 namespace: 'production'
+                 command: 'apply'
+                 arguments: '-f k8s-deployment.yml'
+           deployment:
+             environment: 'production'
+   ```
