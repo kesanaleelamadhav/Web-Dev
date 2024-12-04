@@ -1,0 +1,33 @@
+CI Pipeline (Continuous Integration)**
+1. **Create a Build Pipeline in Azure DevOps**:
+   - Go to **Pipelines** > **Create Pipeline** > Select your Git repository.
+   - Use a YAML file to define build tasks for your CI pipeline.
+   
+   **Sample `azure-pipelines.yml` for Building Docker Images**:
+   ```yaml
+   trigger:
+     branches:
+       include:
+         - main
+
+   pool:
+     vmImage: 'ubuntu-latest'
+
+   variables:
+     imageName: 'gaming-app'
+
+   stages:
+     - stage: Build
+       jobs:
+         - job: Build
+           steps:
+             - task: Docker@2
+               inputs:
+                 containerRegistry: 'yourACRServiceConnection'
+                 repository: '$(imageName)'
+                 command: 'buildAndPush'
+                 Dockerfile: '**/Dockerfile'
+                 tags: |
+                   $(Build.BuildId)
+   ```
+   - **Explanation**: This pipeline builds Docker images and pushes them to ACR on every commit to the main branch.
